@@ -2,79 +2,100 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(17)
+  const [ToDos, setToDos] = useState([]);
+  const [sortBy, setSortBy] = useState("all");
+
+  const addToDo = (listName, listOwner) => {
+    const newToDo = {
+      id: Date.now(),
+      title: listName,
+      listOwner: listOwner
+    };
+    setToDos([...ToDos, newToDo]);
+  };
+
+  const removeToDo = (id) => {
+    setToDos(ToDos.filter(ToDo => ToDo.id !== id));
+  };
+
+  const uniqueOwners = [...new Set(ToDos.map(ToDo => ToDo.listOwner))];
+  
+  let filteredToDos;
+  if (sortBy === "all") {
+    filteredToDos = ToDos;
+  } else {
+    filteredToDos = ToDos.filter(ToDo => ToDo.listOwner === sortBy);
+  }
+  return (
+    <div className="App">
+      <ToDoInput onAdd={addToDo} />
+      <div style={{ padding: "20px"}}>
+        <label>
+          Filter by owner:
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="all">All owners</option>
+            {uniqueOwners.map(owner => (
+              <option key={owner} value={owner}>{owner}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <ToDoList ToDos={filteredToDos} onRemove={removeToDo} />
+    </div>
+  );
+}
+function ToDoInput({ onAdd }) {
+  const ToDoInputContainerStyle = {
+    padding: "20px",
+  };
+  const [listName, setListName] = useState("");
+  const [listOwner, setListOwner] = useState("");
+
+  const handleSubmit = () => {
+    if (listName && listOwner) {
+      onAdd(listName, listOwner);
+      setListName("");
+      setListOwner("");
+    }
+  };
 
   return (
-    <>
-      <div className="card">
-      </div>
-      <Users />
-      <RandomNumber />
-    </>
-  )
+    <div style={ToDoInputContainerStyle}>
+      <label htmlFor="listOwner">
+        Username:
+        <input id="listOwner" onChange={(e) => setListOwner(e.target.value)} value={listOwner} />
+      </label>
+      <label htmlFor='listName'>
+        To Do Item:
+        <input id="listName" onChange={(e) => setListName(e.target.value)} value={listName} />
+      </label>
+      <button onClick={handleSubmit}>Add To Do Item</button>
+    </div>
+  );
 }
-function Users() {
-  const users = [
-    {
-      name: 'Ryan',
-      age: 29,
-      favoriteThings: ["pizza", "ponies", "the downfall of capitalism in the modern era"]
-    },
-    {
-      name: 'Ali',
-      age: 25,
-      favoriteThings: ["pizza", "ponies", "the downfall of capitalism in the modern era"]
-    },
-    {
-      name: 'Maggie',
-      age: 27,
-      favoriteThings: ["pizza", "ponies", "the downfall of capitalism in the modern era"]
-    }
-  ];
+
+function ToDoList({ ToDos, onRemove }) {
+  const ToDoListContainerStyle = {
+    display: "flex",
+    flexDirection: "column",
+    padding: "20px",
+  };
+
   return (
-    <div>
-      {users.map((user, userIndex) => (
-        <div key={userIndex}>
-          <h2>{user.name}</h2>
-          <p>Age: {user.age}</p>
-          <p>Favorite Things: </p>
-          <ul>
-            {user.favoriteThings.map((thing, thingIndex) => (
-              <li key={thingIndex}>{thing}</li>
-            ))}
-          </ul>
+    <div style={ToDoListContainerStyle}>
+      <h2>To Do List</h2>
+      {ToDos.map((ToDo) => (
+        <div key={ToDo.id}>
+          <h3>{ToDo.title}</h3>
+          <p>List Owner: {ToDo.listOwner}</p>
+          <button onClick={() => onRemove(ToDo.id)}>Delete</button>
         </div>
       ))}
     </div>
   );
 }
-const RandomNumber = () => {
-  const [number, setNumber] = useState(null);
 
-  const generateNumber = () => {
-    setNumber(Math.floor(Math.random() * 200));
-  };
-  const getNumberType = () => {
-    if (number === null) return null;
-    return number % 2 === 0 ? 'even' : 'odd';
-  };
-  return (
-    <div className="p-4 text-center">
-      <h2 className="text-xl font-bold mb-4">Random Number</h2>
-      <button
-        onClick={generateNumber}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-      >
-        Generate Number
-      </button>
-      {number !== null && (
-        <div className="mt-4">
-        <p className="text-lg">
-          Your random number is: {number} and it is {getNumberType()}
-        </p>
-        </div>
-      )}
-    </div>
-  );
-};
 export default App
