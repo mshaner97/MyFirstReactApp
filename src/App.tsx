@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import Button from '@mui/material/Button';
 
 function App() {
   const [ToDos, setToDos] = useState([]);
@@ -72,7 +73,13 @@ function ToDoInput({ onAdd }) {
         To Do Item:
         <input id="listName" onChange={(e) => setListName(e.target.value)} value={listName} />
       </label>
-      <button onClick={handleSubmit}>Add To Do Item</button>
+      <Button onClick={handleSubmit}variant="contained" 
+  sx={{ 
+    backgroundColor: '#ff4da3', 
+    '&:hover': { backgroundColor: '#ff1a8c' }
+  }}
+  size="small"
+>Add To Do Item</Button>
     </div>
   );
 }
@@ -81,17 +88,54 @@ function ToDoList({ ToDos, onRemove }) {
   const ToDoListContainerStyle = {
     display: "flex",
     flexDirection: "column",
+    gap: "10px",
     padding: "20px",
+    border: "2px solid #ff1a8c",
+    borderRadius: "10px",
+    backgroundColor: "#f8f9fa",
+    maxHeight: "400px",
+    overflowY: "auto",
+    width: '100%',
+    boxSizing: 'border-box',
+  };
+
+  const todoItemStyle = {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    border: "1px solid #ced4da",
+    borderRadius: "8px",
+    padding: "15px",
+    backgroundColor: "white",
+    boxSizing: 'border-box',
+    minWidth: 0,
+  };
+
+  const textStyle = {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    marginRight: '10px',
   };
 
   return (
     <div style={ToDoListContainerStyle}>
       <h2>To Do List</h2>
       {ToDos.map((ToDo) => (
-        <div key={ToDo.id}>
-          <h3>{ToDo.title}</h3>
-          <p>List Owner: {ToDo.listOwner}</p>
-          <button onClick={() => onRemove(ToDo.id)}>Delete</button>
+        <div key={ToDo.id} style={todoItemStyle}>
+          <span>List Owner: {ToDo.listOwner}</span>
+          <span>{ToDo.title}</span>
+          <Button 
+  onClick={() => onRemove(ToDo.id)} 
+  variant="contained" 
+  sx={{
+    backgroundColor: '#ff4da3', '&:hover': { backgroundColor: '#ff1a8c' }
+  }}
+  size="small"
+>
+  Remove
+</Button>
         </div>
       ))}
     </div>
