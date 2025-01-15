@@ -2,9 +2,46 @@ import { useState } from 'react'
 import './App.css'
 import Button from '@mui/material/Button';
 
+const ListContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "10px",
+  padding: "20px",
+  border: "3px solid #ff1a8c",
+  borderRadius: "10px",
+  backgroundColor: "#f8f9fa",
+  maxHeight: "400px",
+  overflowY: "auto",
+  width: '100%',
+  boxSizing: 'border-box',
+};
+const ItemStyle = {
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  border: "1px solid #ced4da",
+  borderRadius: "8px",
+  padding: "15px",
+  backgroundColor: "white",
+  boxSizing: 'border-box',
+  minWidth: 0,
+};
+
+const textStyle = {
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  marginRight: '10px',
+};
+
 function App() {
   const [ToDos, setToDos] = useState([]);
   const [sortBy, setSortBy] = useState("all");
+  const [completedToDos, setCompletedToDos] = useState([]);
+  const clearCompletedToDos = () => {
+    setCompletedToDos([]);
+  };
 
   const addToDo = (listName, listOwner) => {
     const newToDo = {
@@ -19,6 +56,18 @@ function App() {
     setToDos(ToDos.filter(ToDo => ToDo.id !== id));
   };
 
+  const moveToDone = (id) => {
+    const todoToMove = ToDos.find(ToDo => ToDo.id === id);
+    setToDos(ToDos.filter(ToDo => ToDo.id !== id));
+    setCompletedToDos([...completedToDos, todoToMove]);
+  };
+
+  const restoreToDo = (id) => {
+    const todoToRestore = completedToDos.find(todo => todo.id === id);
+    setCompletedToDos(completedToDos.filter(todo => todo.id !== id));
+    setToDos([...ToDos, todoToRestore]);
+  };
+
   const uniqueOwners = [...new Set(ToDos.map(ToDo => ToDo.listOwner))];
   
   let filteredToDos;
@@ -27,6 +76,7 @@ function App() {
   } else {
     filteredToDos = ToDos.filter(ToDo => ToDo.listOwner === sortBy);
   }
+
   return (
     <div className="App">
       <ToDoInput onAdd={addToDo} />
@@ -44,13 +94,19 @@ function App() {
           </select>
         </label>
       </div>
-      <ToDoList ToDos={filteredToDos} onRemove={removeToDo} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <ToDoList ToDos={filteredToDos} onRemove={moveToDone} />
+        <DoneList completedToDos={completedToDos} onRestore={restoreToDo} onClear={clearCompletedToDos} />
+      </div>
     </div>
   );
 }
 function ToDoInput({ onAdd }) {
   const ToDoInputContainerStyle = {
     padding: "20px",
+    display: "flex",
+    gap: "30px",
+    border: "solid 3px #ff4da3"
   };
   const [listName, setListName] = useState("");
   const [listOwner, setListOwner] = useState("");
@@ -85,45 +141,11 @@ function ToDoInput({ onAdd }) {
 }
 
 function ToDoList({ ToDos, onRemove }) {
-  const ToDoListContainerStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-    padding: "20px",
-    border: "2px solid #ff1a8c",
-    borderRadius: "10px",
-    backgroundColor: "#f8f9fa",
-    maxHeight: "400px",
-    overflowY: "auto",
-    width: '100%',
-    boxSizing: 'border-box',
-  };
-
-  const todoItemStyle = {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    border: "1px solid #ced4da",
-    borderRadius: "8px",
-    padding: "15px",
-    backgroundColor: "white",
-    boxSizing: 'border-box',
-    minWidth: 0,
-  };
-
-  const textStyle = {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    marginRight: '10px',
-  };
-
   return (
-    <div style={ToDoListContainerStyle}>
+    <div style={ListContainerStyle}>
       <h2>To Do List</h2>
       {ToDos.map((ToDo) => (
-        <div key={ToDo.id} style={todoItemStyle}>
+        <div key={ToDo.id} style={ItemStyle}>
           <span>List Owner: {ToDo.listOwner}</span>
           <span>{ToDo.title}</span>
           <Button 
@@ -134,8 +156,44 @@ function ToDoList({ ToDos, onRemove }) {
   }}
   size="small"
 >
-  Remove
+  Done
 </Button>
+        </div>
+      ))}
+    </div>
+  );
+}
+function DoneList({ completedToDos, onRestore, onClear}) {
+  return (
+    <div style={ListContainerStyle}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <h2>To Done List</h2>
+        <Button 
+          onClick={onClear}
+          variant="contained" 
+          sx={{
+            backgroundColor: '#ff4da3', 
+            '&:hover': { backgroundColor: '#ff1a8c' }
+          }}
+          size="small"
+        >
+          Clear All
+        </Button>
+      </div>
+      {completedToDos.map((completedToDo) => (
+        <div key={completedToDo.id} style={ItemStyle}>
+          <span>List Owner: {completedToDo.listOwner}</span>
+          <span>{completedToDo.title}</span>
+          <Button 
+            onClick={() => onRestore(completedToDo.id)} 
+            variant="contained" 
+            sx={{
+              backgroundColor: '#ff4da3', '&:hover': { backgroundColor: '#ff1a8c' }
+            }}
+            size="small"
+          >
+            Restore
+          </Button>
         </div>
       ))}
     </div>
