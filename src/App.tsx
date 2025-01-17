@@ -67,11 +67,13 @@ function App() {
     setCompletedToDos([]);
   };
 
-  const addToDo = (listName, listOwner) => {
+  const addToDo = (listOwner, title, comment, priority) => {
     const newToDo = {
       id: Date.now(),
-      title: listName,
-      listOwner: listOwner
+      listOwner: listOwner,
+      title: title,
+      comment: comment,
+      priority: priority
     };
     setToDos([...ToDos, newToDo]);
   };
@@ -147,14 +149,18 @@ function ToDoInput({ onAdd, sortBy, setSortBy, uniqueOwners, theme}) {
     gap: "20px",
     alignItems: "flex-end",
   };
-  const [listName, setListName] = useState("");
   const [listOwner, setListOwner] = useState("");
+  const [title, setTitle] = useState("");
+  const [comment, setComment] = useState("");
+  const [priority, setPriority] = useState("low");
 
   const handleSubmit = () => {
-    if (listName && listOwner) {
-      onAdd(listName, listOwner);
-      setListName("");
+    if (listOwner && title) {
+      onAdd(listOwner, title, comment, priority);
       setListOwner("");
+      setTitle("");
+      setComment("");
+      setPriority("low")
     }
   };
 
@@ -165,9 +171,21 @@ function ToDoInput({ onAdd, sortBy, setSortBy, uniqueOwners, theme}) {
           Username:
           <input id="listOwner" onChange={(e) => setListOwner(e.target.value)} value={listOwner} />
         </label>
-        <label htmlFor='listName'>
-          To Do Item:
-          <input id="listName" onChange={(e) => setListName(e.target.value)} value={listName} />
+        <label htmlFor='title'>
+          Title:
+          <input id="title" onChange={(e) => setTitle(e.target.value)} value={title} />
+        </label>
+        <label htmlFor='comment'>
+          Comment:
+          <input id="comment" onChange={(e) => setComment(e.target.value)} value={comment} />
+        </label>
+        <label htmlFor='priority'>
+          Priority:
+          <select id="priority" onChange={(e) => setPriority(e.target.value)} value={priority}>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
         </label>
         <Button 
           onClick={handleSubmit}
@@ -209,14 +227,19 @@ function ToDoList({ ToDos, onRemove, theme }) {
     ...ItemStyle,
     backgroundColor: theme.backgroundColor,
     border: `1px solid ${theme.primaryColor}`,
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '5px',
   };
   return (
     <div style={listContainerStyle}>
       <h2 style={{ color: theme.textColor }}>To Do List</h2>
       {ToDos.map((ToDo) => (
-        <div key={ToDo.id} style={itemStyle}>
-          <span style={{ color: theme.textColor }}>List Owner: {ToDo.listOwner}</span>
-          <span style={{ color: theme.textColor }}>{ToDo.title}</span>
+          <div key={ToDo.id} style={itemStyle}>
+          <span style={{ color: theme.textColor }}>Owner: {ToDo.listOwner}</span>
+          <span style={{ color: theme.textColor }}>Title: {ToDo.title}</span>
+          <span style={{ color: theme.textColor }}>Comment: {ToDo.comment}</span>
+          <span style={{ color: theme.textColor }}>Priority: {ToDo.priority}</span>
           <Button 
             onClick={() => onRemove(ToDo.id)} 
             variant="contained" 
@@ -245,6 +268,9 @@ function DoneList({ completedToDos, onRestore, onClear, theme}) {
     ...ItemStyle,
     backgroundColor: theme.backgroundColor,
     border: `1px solid ${theme.primaryColor}`,
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '5px',
   };
   return (
     <div style={listContainerStyle}>
@@ -265,8 +291,10 @@ function DoneList({ completedToDos, onRestore, onClear, theme}) {
       </div>
       {completedToDos.map((completedToDo) => (
         <div key={completedToDo.id} style={itemStyle}>
-          <span style={{ color: theme.textColor }}>List Owner: {completedToDo.listOwner}</span>
-          <span style={{ color: theme.textColor }}>{completedToDo.title}</span>
+          <span style={{ color: theme.textColor }}>Owner: {completedToDo.listOwner}</span>
+          <span style={{ color: theme.textColor }}>Title: {completedToDo.title}</span>
+          <span style={{ color: theme.textColor }}>Comment: {completedToDo.comment}</span>
+          <span style={{ color: theme.textColor }}>Priority: {completedToDo.priority}</span>
           <Button 
             onClick={() => onRestore(completedToDo.id)} 
             variant="contained" 
@@ -274,6 +302,7 @@ function DoneList({ completedToDos, onRestore, onClear, theme}) {
               backgroundColor: theme.primaryColor,
               '&:hover': { backgroundColor: theme.secondaryColor },
               color: theme.backgroundColor,
+              alignSelf: 'flex-end',
             }}
             size="small"
           >
