@@ -85,7 +85,7 @@ function App() {
       comment: comment,
       priority: priority
     };
-    setToDos([...ToDos, newToDo]);
+    setToDos([newToDo, ...ToDos]);
   };
 
   const removeToDo = (id) => {
@@ -225,44 +225,85 @@ function ToDoInput({ onAdd, sortBy, setSortBy, uniqueOwners, theme}) {
     </div>
   );
 }
+function ToDoItem({ todo, onAction, actionText, theme }) {
+  const itemStyle = {
+    ...ItemStyle,
+    backgroundColor: theme.backgroundColor,
+    border: `1px solid ${theme.primaryColor}`,
+    borderRadius: '4px',
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '5px',
+  };
 
+  return (
+    <div key={todo.id} style={itemStyle}>
+      <span style={{ color: theme.textColor }}>Owner: {todo.listOwner}</span>
+      <span style={{ color: theme.textColor }}>Title: {todo.title}</span>
+      <span style={{ color: theme.textColor }}>Comment: {todo.comment}</span>
+      <span style={{ color: theme.textColor }}>Priority: {todo.priority}</span>
+      <Button 
+        onClick={() => onAction(todo.id)} 
+        variant="contained" 
+        sx={{
+          backgroundColor: theme.primaryColor,
+          '&:hover': { backgroundColor: theme.secondaryColor },
+          color: theme.backgroundColor,
+        }}
+        size="small"
+      >
+        {actionText}
+      </Button>
+    </div>
+  );
+}
 function ToDoList({ ToDos, onRemove, theme }) {
   const listContainerStyle = {
     ...ListContainerStyle,
     border: `3px solid ${theme.primaryColor}`,
     backgroundColor: theme.secondaryColor,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
   };
 
-  const itemStyle = {
-    ...ItemStyle,
-    backgroundColor: theme.backgroundColor,
-    border: `1px solid ${theme.primaryColor}`,
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '5px',
+  const recentToDoContainerStyle = {
+    overflow: 'hidden',
   };
+
+  const recentToDoHeaderStyle = {
+    backgroundColor: theme.primaryColor,
+    color: theme.backgroundColor,
+    padding: '10px',
+    margin: '0',
+  };
+
+  const [mostRecentToDo, ...otherToDos] = ToDos;
+
   return (
     <div style={listContainerStyle}>
-      <h2 style={{ color: theme.textColor }}>To Do List</h2>
-      {ToDos.map((ToDo) => (
-          <div key={ToDo.id} style={itemStyle}>
-          <span style={{ color: theme.textColor }}>Owner: {ToDo.listOwner}</span>
-          <span style={{ color: theme.textColor }}>Title: {ToDo.title}</span>
-          <span style={{ color: theme.textColor }}>Comment: {ToDo.comment}</span>
-          <span style={{ color: theme.textColor }}>Priority: {ToDo.priority}</span>
-          <Button 
-            onClick={() => onRemove(ToDo.id)} 
-            variant="contained" 
-            sx={{
-              backgroundColor: theme.primaryColor,
-              '&:hover': { backgroundColor: theme.secondaryColor },
-              color: theme.backgroundColor,
-            }}
-            size="small"
-          >
-            Done
-          </Button>
+      <h2 style={{ color: theme.textColor, marginBottom: '10px' }}>To Do List</h2>
+      {mostRecentToDo && (
+        <div style={recentToDoContainerStyle}>
+          <h3 style={recentToDoHeaderStyle}>Most Recent To-Do</h3>
+          <div style={{ backgroundColor: '#ff8dc6', borderRadius: '4px' }}>
+            <ToDoItem 
+              todo={mostRecentToDo}
+              onAction={onRemove}
+              actionText="Done"
+              theme={{...theme, backgroundColor: '#ff8dc6', textColor: theme.backgroundColor}}
+            />
+          </div>
         </div>
+      )}
+      {otherToDos.map((todo) => (
+        <ToDoItem 
+          key={todo.id}
+          todo={todo}
+          onAction={onRemove}
+          actionText="Done"
+          theme={theme}
+        />
       ))}
     </div>
   );
@@ -274,14 +315,6 @@ function DoneList({ completedToDos, onRestore, onClear, theme}) {
     backgroundColor: theme.secondaryColor,
   };
 
-  const itemStyle = {
-    ...ItemStyle,
-    backgroundColor: theme.backgroundColor,
-    border: `1px solid ${theme.primaryColor}`,
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '5px',
-  };
   return (
     <div style={listContainerStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -300,25 +333,13 @@ function DoneList({ completedToDos, onRestore, onClear, theme}) {
         </Button>
       </div>
       {completedToDos.map((completedToDo) => (
-        <div key={completedToDo.id} style={itemStyle}>
-          <span style={{ color: theme.textColor }}>Owner: {completedToDo.listOwner}</span>
-          <span style={{ color: theme.textColor }}>Title: {completedToDo.title}</span>
-          <span style={{ color: theme.textColor }}>Comment: {completedToDo.comment}</span>
-          <span style={{ color: theme.textColor }}>Priority: {completedToDo.priority}</span>
-          <Button 
-            onClick={() => onRestore(completedToDo.id)} 
-            variant="contained" 
-            sx={{
-              backgroundColor: theme.primaryColor,
-              '&:hover': { backgroundColor: theme.secondaryColor },
-              color: theme.backgroundColor,
-              alignSelf: 'flex-end',
-            }}
-            size="small"
-          >
-            Restore
-          </Button>
-        </div>
+        <ToDoItem 
+          key={completedToDo.id}
+          todo={completedToDo}
+          onAction={onRestore}
+          actionText="Restore"
+          theme={theme}
+        />
       ))}
     </div>
   );
