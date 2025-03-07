@@ -39,11 +39,6 @@ const textStyle = {
 function App() {
   const [mode, setMode] = useState('light');
 
-  // This was replaced by the setMode(callback) call below
-  // useEffect(() => {
-  //   document.body.className = mode;
-  // }, [mode]);
-
   const themes = {
     light: {
       backgroundColor: '#ffffff',
@@ -61,8 +56,6 @@ function App() {
   const currentTheme = themes[mode];
   const toggleMode = () => {
     setMode((previousMode) => {
-      // What is returned from this is what the state will be on the next render...
-      // But we can also do other stuff here, like change the body class
 
       const nextMode = previousMode === 'light' ? 'dark' : 'light';
       document.body.className = nextMode;
